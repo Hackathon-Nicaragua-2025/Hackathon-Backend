@@ -1,0 +1,6 @@
+@AviFy_HostAddress = http://localhost:5173
+
+GET {{AviFy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
