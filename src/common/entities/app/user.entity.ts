@@ -5,55 +5,89 @@ import {
   BeforeInsert,
   BeforeUpdate,
   JoinTable,
-  OneToOne,
-  JoinColumn,
+  OneToMany,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { RefreshToken } from './refresh-token.entity';
-import { BaseEntity } from '../base-entity.entity';
 import { Role } from './role.entity';
-import { getSchemaName } from '../../utils/schema-prefix.util';
+import { VerificationToken } from './verification-token.entity';
+import { LoginAudit } from './login-audit.entity';
 
-@Entity('user', { schema: getSchemaName('app') })
-export class User extends BaseEntity {
-  @PrimaryGeneratedColumn({ name: 'id', type: 'int' })
-  id!: number;
+@Entity('Users', { schema: 'app' })
+export class User {
+  @PrimaryGeneratedColumn('uuid', { name: 'UserId' })
+  userId!: string;
 
-  @Column('nvarchar', { length: 255, name: 'first_name' })
-  firstName!: string;
+  @Column('nvarchar', { length: 200, name: 'Nombre' })
+  nombre!: string;
 
-  @Column('nvarchar', { length: 255, name: 'last_name' })
-  lastName!: string;
-
-  @Column('int', { nullable: true })
-  age!: number;
-
-  @Column('nvarchar', { length: 255, unique: true })
+  @Column('nvarchar', { length: 200, name: 'Email' })
   email!: string;
 
-  @Column('nvarchar', { length: 255 })
-  @Exclude()
-  password!: string;
+  @Column('nvarchar', { length: 200, name: 'EmailNormalized' })
+  emailNormalized!: string;
 
-  @Column('bit', { default: true, name: 'is_active' })
+  @Column('nvarchar', { length: 500, nullable: true, name: 'PasswordHash' })
+  @Exclude()
+  passwordHash!: string;
+
+  @Column('nvarchar', { length: 50, nullable: true, name: 'Phone' })
+  phone!: string;
+
+  @Column('nvarchar', { nullable: true, name: 'AvatarUrl' })
+  avatarUrl!: string;
+
+  @Column('bit', { default: false, name: 'IsVerified' })
+  isVerified!: boolean;
+
+  @Column('bit', { default: true, name: 'IsActive' })
   isActive!: boolean;
 
-  @BeforeInsert()
-  checkFieldsBeforeInsert() {
-    this.email = this.email.toLocaleLowerCase().trim();
-  }
+  @Column('int', { default: 0, name: 'FailedLoginCount' })
+  failedLoginCount!: number;
 
-  @BeforeUpdate()
-  checkFieldsBeforeUpdate() {
-    this.email = this.email.toLowerCase().trim();
-  }
+  @Column('datetime2', { nullable: true, name: 'LockoutUntil' })
+  lockoutUntil!: Date | null;
 
-  @ManyToMany(() => Role, (role) => role.users, { eager: true })
-  @JoinTable()
+  @CreateDateColumn({ name: 'CreatedAt' })
+  createdAt!: Date;
+
+  @Column('datetime2', { nullable: true, name: 'LastLoginAt' })
+  lastLoginAt!: Date | null;
+
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable({
+    name: 'UserRoles',
+    schema: 'app',
+    joinColumn: {
+      name: 'UserId',
+      referencedColumnName: 'userId',
+    },
+    inverseJoinColumn: {
+      name: 'RoleId',
+      referencedColumnName: 'roleId',
+    },
+  })
   roles!: Role[];
 
-  @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
-  @JoinColumn()
-  refreshToken!: RefreshToken;
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens!: RefreshToken[];
+
+  @OneToMany(() => VerificationToken, (verificationToken) => verificationToken.user)
+  verificationTokens!: VerificationToken[];
+
+  @OneToMany(() => LoginAudit, (loginAudit) => loginAudit.user)
+  loginAudits!: LoginAudit[];
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  normalizeEmail() {
+    if (this.email) {
+      this.email = this.email.toLowerCase().trim();
+      this.emailNormalized = this.email.toLowerCase().trim();
+    }
+  }
 }

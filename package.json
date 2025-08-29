@@ -1,10 +1,10 @@
 {
-   "name": "pref-vision",
-   "version": "0.0.1",
-   "description": "",
-   "author": "",
+   "name": "avify",
+   "version": "1.0.0",
+   "description": "AviFy - Plataforma digital para promover el aviturismo y las reservas naturales de Nicaragua",
+   "author": "Equipo de Desarrollo AviFy",
    "private": true,
-   "license": "UNLICENSED",
+   "license": "MIT",
    "prettier": {
       "singleQuote": true,
       "trailingComma": "all",

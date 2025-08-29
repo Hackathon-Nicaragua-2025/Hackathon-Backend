@@ -1,85 +1,147 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🦅 AviFy - Plataforma de Aviturismo Nicaragua
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Plataforma digital para promover el aviturismo y las reservas naturales de Nicaragua, facilitando la conexión entre turistas y guías locales certificados.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🎯 Descripción del Proyecto
 
-## Description
+**AviFy** es una plataforma desarrollada con **NestJS** y **TypeScript** que tiene como objetivo:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Promover áreas protegidas** de Nicaragua
+- **Centralizar información de especies** de aves endémicas y migratorias
+- **Gestionar reservas** de tours guiados
+- **Facilitar la conexión** entre operadores locales y turistas nacionales e internacionales
 
-## Project setup
+## 🚀 Funcionalidades Principales
 
-```bash
-$ npm install
-```
+1. **Registro de usuarios** con diferentes roles (Turista, Guía, Admin)
+2. **Catálogo digital de aves** con fotografías, descripciones y mapas de distribución
+3. **Información de reservas naturales** habilitadas para aviturismo
+4. **Calendario de temporadas** de avistamiento y eventos especiales
+5. **Sistema de reservas en línea** para contratar guías certificados
+6. **Módulo educativo** sobre conservación y buenas prácticas
 
-## Compile and run the project
+## 🛠️ Tecnologías Utilizadas
 
-```bash
-# development
-$ npm run start
+- **Backend**: NestJS, TypeScript
+- **Base de Datos**: SQL Server con TypeORM
+- **Autenticación**: JWT, Passport.js
+- **Autorización**: RBAC (Role-Based Access Control)
+- **Validación**: class-validator, class-transformer
+- **Documentación**: Swagger/OpenAPI
+- **Logging**: Winston
+- **Testing**: Jest
 
-# watch mode
-$ npm run start:dev
+## 📋 Prerrequisitos
 
-# production mode
-$ npm run start:prod
-```
+- Node.js (v18 o superior)
+- SQL Server
+- npm o yarn
 
-## Run tests
+## 🔧 Instalación
 
 ```bash
-# unit tests
-$ npm run test
+# Clonar el repositorio
+git clone <tu-repositorio>
 
-# e2e tests
-$ npm run test:e2e
+# Instalar dependencias
+npm install
 
-# test coverage
-$ npm run test:cov
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus configuraciones
+
+# Compilar el proyecto
+npm run build
 ```
 
-## Resources
+## 🚀 Ejecución
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# Desarrollo
+npm run start:dev
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Producción
+npm run start:prod
 
-## Support
+# Modo watch
+npm run start
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🧪 Testing
 
-## Stay in touch
+```bash
+# Tests unitarios
+npm run test
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Tests e2e
+npm run test:e2e
 
-## License
+# Cobertura de tests
+npm run test:cov
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 📚 Documentación API
+
+Una vez ejecutado el proyecto, la documentación Swagger estará disponible en:
+- **Swagger UI**: http://localhost:3000/docs
+- **Swagger YAML**: http://localhost:3000/swagger.yaml
+
+## 🔐 Sistema de Autenticación y Autorización
+
+### Roles del Sistema
+- **Turista**: Usuario estándar con permisos básicos
+- **Guía**: Guía verificado con permisos extendidos
+- **Admin**: Administrador con acceso completo
+
+### Endpoints de Autenticación
+- `POST /auth/register` - Registro de usuarios
+- `POST /auth/login` - Inicio de sesión
+- `POST /auth/refresh-token` - Renovación de token
+- `GET /auth/me` - Información del usuario actual
+- `POST /auth/send-recovery-code` - Envío de código de recuperación
+- `POST /auth/reset-password` - Restablecimiento de contraseña
+
+## 🗄️ Estructura de Base de Datos
+
+El proyecto utiliza un esquema modular con:
+- **Esquema `app`**: Usuarios, roles, permisos y autenticación
+- **Esquema `model`**: Entidades del dominio de aviturismo
+- **Esquema `raw`**: Datos sin procesar
+- **Esquema `config`**: Configuraciones del sistema
+
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── app/                    # Módulos de autenticación y autorización
+│   ├── authentication/     # Login, registro, JWT
+│   ├── authorization/      # Gestión de roles y permisos
+│   └── audit-log/         # Auditoría del sistema
+├── common/                # Utilidades compartidas
+│   ├── entities/          # Entidades de base de datos
+│   ├── guards/            # Guards de autorización
+│   ├── decorators/        # Decoradores personalizados
+│   └── services/          # Servicios comunes
+├── config/                # Configuraciones del sistema
+└── model/                 # Entidades del dominio
+```
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 📞 Contacto
+
+Para más información sobre el proyecto de aviturismo en Nicaragua, contacta al equipo de desarrollo.
+
+---
+
+**Desarrollado con ❤️ para promover el aviturismo en Nicaragua**

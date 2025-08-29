@@ -1,30 +1,38 @@
-import { Controller, Get, Logger, Redirect } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from './common/decorators/public.decorator';
+import { ApiResponseDto } from './common/dto/api-response.dto';
 
-@ApiTags('Health Check')
+@ApiTags('AviFy - General')
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  //main we need to redirect to the swagger documentation
-  @Get()
+  @ApiOperation({ summary: 'Health check endpoint' })
+  @ApiResponse({ status: 200, description: 'Application is running' })
   @Public()
-  @Redirect('/docs')
-  @ApiExcludeEndpoint()
-  redirectToSwagger() {
-    Logger.log('Redirecting to Swagger');
+  @Get()
+  getHello(): ApiResponseDto<string> {
+    return ApiResponseDto.Success(
+      this.appService.getHello(),
+      'AviFy API',
+      'AviFy - Plataforma de Aviturismo Nicaragua está funcionando correctamente'
+    );
   }
 
-  @ApiOperation({ summary: 'Check the health of the service' })
-  @ApiResponse({
-    status: 200,
-    description: 'The service is up and running.',
-  })
+  @ApiOperation({ summary: 'Health check endpoint' })
+  @ApiResponse({ status: 200, description: 'Application is healthy' })
   @Public()
-  @Get('health-check')
-  getCheckHealth(): string {
-    return this.appService.getHello();
+  @Get('health')
+  getHealth(): ApiResponseDto<{ status: string; timestamp: string }> {
+    return ApiResponseDto.Success(
+      {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+      },
+      'Health Check',
+      'AviFy API está funcionando correctamente'
+    );
   }
 }

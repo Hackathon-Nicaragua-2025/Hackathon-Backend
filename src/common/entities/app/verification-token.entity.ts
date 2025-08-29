@@ -8,10 +8,10 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity('RefreshTokens', { schema: 'app' })
-export class RefreshToken {
-  @PrimaryGeneratedColumn('uuid', { name: 'RefreshTokenId' })
-  refreshTokenId!: string;
+@Entity('VerificationTokens', { schema: 'app' })
+export class VerificationToken {
+  @PrimaryGeneratedColumn('uuid', { name: 'VerificationId' })
+  verificationId!: string;
 
   @Column('uniqueidentifier', { name: 'UserId' })
   userId!: string;
@@ -19,19 +19,19 @@ export class RefreshToken {
   @Column('nvarchar', { length: 500, name: 'TokenHash' })
   tokenHash!: string;
 
+  @Column('nvarchar', { length: 50, name: 'Purpose' })
+  purpose!: string; // 'email_verification' | 'password_reset'
+
   @Column('datetime2', { name: 'ExpiresAt' })
   expiresAt!: Date;
 
   @CreateDateColumn({ name: 'CreatedAt' })
   createdAt!: Date;
 
-  @Column('datetime2', { nullable: true, name: 'RevokedAt' })
-  revokedAt!: Date | null;
+  @Column('datetime2', { nullable: true, name: 'UsedAt' })
+  usedAt!: Date | null;
 
-  @Column('uniqueidentifier', { nullable: true, name: 'ReplacedByToken' })
-  replacedByToken!: string | null;
-
-  @ManyToOne(() => User, (user) => user.refreshTokens, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.verificationTokens, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'UserId' })
   user!: User;
 }

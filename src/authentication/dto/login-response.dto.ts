@@ -1,37 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { UserResponseDto } from './user-response.dto';
 import { RoleDto } from './role.dto';
 
 export class LoginResponseDto extends UserResponseDto {
   @ApiProperty({
-    title: 'JWT Token',
-    example: 'jwt-token',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: 'JWT token de acceso',
   })
   @Expose()
   token!: string;
 
   @ApiProperty({
-    title: 'Refresh Token',
-    example: 'refresh-token',
+    example: 'refresh_token_hash_here',
+    description: 'Token de renovación',
   })
   @Expose()
   refreshToken!: string;
 
   @ApiProperty({
-    title: 'Roles',
-    type: [RoleDto], // Array of RoleDto objects
-    example: [{ id: 1, name: 'Admin' }],
+    example: ['bird_catalog_read', 'booking_create'],
+    description: 'Permisos del usuario',
+    isArray: true,
   })
   @Expose()
-  @Type(() => RoleDto)
-  roles!: RoleDto[]; // Include roles as an array of RoleDto
+  permissions!: string[];
 
   @ApiProperty({
-    title: 'Permissions',
-    type: [String],
-    example: ['QUERY_CREATE', 'QUERY_READ', 'QUERY_UPDATE'],
+    type: [RoleDto],
+    description: 'Roles del usuario',
   })
   @Expose()
-  permissions!: string[]; // Array to hold permissions
+  roles!: RoleDto[];
 }

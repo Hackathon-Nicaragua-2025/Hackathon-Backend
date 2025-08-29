@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
-import { PermissionActions } from '../authentication/enums/authorization.enum';
+import { Repository } from 'typeorm';
+import { PermissionActions } from '../app/authentication/enums/authorization.enum';
 import { Permission } from '../common/entities/app/permission.entity';
-import { Module } from '../common/entities/app/module.entity';
 import { Role } from '../common/entities/app/role.entity';
 import { User } from '../common/entities/app/user.entity';
 import { PasswordHasherService } from '../common/services/password-hasher.service';
 
 @Injectable()
 export class SeedService {
-  constructor(
-    @InjectRepository(Module)
-    private readonly moduleRepository: Repository<Module>,
+  private readonly adminEmail = 'admin@avify.com';
+  private readonly adminPassword = 'AdminPassword123!';
 
+  constructor(
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
 
@@ -27,159 +26,165 @@ export class SeedService {
   ) {}
 
   async seedIfNeeded() {
-    const adminUserExists = await this.userRepository.findOne({ where: { email: 'admin@perflog.com' } });
+    const adminUserExists = await this.userRepository.findOne({ where: { email: this.adminEmail } });
     if (!adminUserExists) {
-      await this.seed();
-    } else {
-      console.log('Seeding not needed, admin user already exists.');
+      await this.createAdminUser();
     }
+
+    await this.createPermissions();
+    await this.createRoles();
+
+    console.log('Seeding completado!');
   }
 
-  async seed() {
-    console.log('Starting seed...');
+  private async createPermissions() {
+    const existingPermissions = new Map(
+      (await this.permissionRepository.find()).map((permission) => [permission.name, permission]),
+    );
 
-    // Step 1: Create Modules and Permissions
     const moduleNames = Object.keys(PermissionActions) as Array<keyof typeof PermissionActions>;
 
     for (const moduleName of moduleNames) {
-      const existingModule = await this.moduleRepository.findOne({ where: { name: moduleName } });
+      const modulePermissions = Object.values(PermissionActions[moduleName]);
 
-      if (!existingModule) {
-        const newModule = this.moduleRepository.create({ name: moduleName });
-        const modulePermissions = Object.values(PermissionActions[moduleName]);
+      for (const permissionName of modulePermissions) {
+        let permission = existingPermissions.get(permissionName);
 
-        const permissions = await Promise.all(
-          modulePermissions.map(async (action) => {
-            const existingPermission = await this.permissionRepository.findOne({ where: { action } });
-            if (!existingPermission) {
-              const permission = this.permissionRepository.create({ action });
-              return this.permissionRepository.save(permission);
-            }
-            return existingPermission;
-          }),
-        );
-
-        newModule.permissions = permissions;
-        await this.moduleRepository.save(newModule);
+        if (!permission) {
+          // Crear permiso si no existe
+          permission = this.permissionRepository.create({ 
+            name: permissionName,
+            description: `Permiso para ${permissionName.replace('_', ' ')}`
+          });
+          permission = await this.permissionRepository.save(permission);
+          existingPermissions.set(permissionName, permission);
+        }
       }
     }
 
-    // Step 2: Create Roles
-    await this.createAdminRole();
-    await this.createManagerRole();
-    await this.createSupervisorRole();
-    await this.createViewerRole();
-    await this.createBasicUserRole();
-
-    // Step 3: Create an Admin User
-    const adminUser = await this.userRepository.findOne({ where: { email: 'admin@perflog.com' } });
-    if (!adminUser) {
-      const password = 'adminPassword123';
-      const adminRole = await this.roleRepository.findOne({ where: { name: 'Admin' } });
-      const hashedPassword = await this.passwordHasher.hashPassword(password);
-
-      if (!adminRole) {
-        console.error('Admin role not found, cannot create admin user.');
-        return;
-      }
-      const newUser = this.userRepository.create({
-        firstName: 'Admin',
-        lastName: 'User',
-        email: 'admin@perflog.com',
-        password: hashedPassword,
-        isActive: true,
-        roles: [adminRole],
-      });
-
-      await this.userRepository.save(newUser);
-    }
-
-    console.log('Seed completed!');
+    // Asignar todos los permisos al rol Admin
+    await this.assignPermissionsToAdmin(Array.from(existingPermissions.values()));
   }
 
-  // Create Admin Role with all permissions
-  async createAdminRole() {
-    const adminRole = await this.roleRepository.findOne({ where: { name: 'Admin' } });
+  private async createRoles() {
+    // Crear rol Turista
+    await this.createTuristaRole();
+    
+    // Crear rol Guía
+    await this.createGuiaRole();
+    
+    // Crear rol Admin (ya se crea en assignPermissionsToAdmin)
+  }
+
+  private async assignPermissionsToAdmin(allPermissions: Permission[]) {
+    // Buscar el rol Admin y sus permisos existentes
+    let adminRole = await this.roleRepository.findOne({
+      where: { name: 'Admin' },
+      relations: ['permissions'],
+    });
+
     if (!adminRole) {
-      const allPermissions = await this.permissionRepository.find();
-      const newAdminRole = this.roleRepository.create({
+      // Crear rol Admin si no existe
+      adminRole = this.roleRepository.create({
         name: 'Admin',
+        description: 'Administrador del sistema',
+        isSystem: true,
         permissions: allPermissions,
       });
-      await this.roleRepository.save(newAdminRole);
-      console.log('Admin role created with all permissions.');
+    } else {
+      // Agregar solo nuevos permisos al rol Admin existente
+      const existingPermissions = new Set(adminRole.permissions.map((p) => p.permissionId));
+      const newPermissions = allPermissions.filter((p) => !existingPermissions.has(p.permissionId));
+      if (newPermissions.length > 0) {
+        adminRole.permissions = [...adminRole.permissions, ...newPermissions];
+      }
     }
+
+    // Guardar rol Admin actualizado
+    await this.roleRepository.save(adminRole);
+    console.log('Rol Admin actualizado con nuevos permisos.');
   }
 
-  // Create Manager Role with full CRUD permissions, but no system-wide permissions
-  async createManagerRole() {
-    const managerRole = await this.roleRepository.findOne({ where: { name: 'Manager' } });
-    if (!managerRole) {
-      const managerPermissions = await this.permissionRepository.find({
+  private async createTuristaRole() {
+    const turistaRole = await this.roleRepository.findOne({ where: { name: 'Turista' } });
+    if (!turistaRole) {
+      const turistaPermissions = await this.permissionRepository.find({
         where: [
-          { action: Like('%create') },
-          { action: Like('%read') },
-          { action: Like('%update') },
-          { action: Like('%delete') },
+          { name: PermissionActions.BOOKINGS.CREATE },
+          { name: PermissionActions.BOOKINGS.VIEW },
+          { name: PermissionActions.SIGHTINGS.CREATE },
+          { name: PermissionActions.SIGHTINGS.VIEW },
+          { name: PermissionActions.BIRD_CATALOG.READ },
+          { name: PermissionActions.RESERVES.READ },
+          { name: PermissionActions.EVENTS.READ },
+          { name: PermissionActions.EDUCATIONAL.READ },
+          { name: PermissionActions.AUTHENTICATION.ME },
         ],
       });
-      const newManagerRole = this.roleRepository.create({
-        name: 'Manager',
-        permissions: managerPermissions,
+      
+      const newTuristaRole = this.roleRepository.create({
+        name: 'Turista',
+        description: 'Usuario registrado estándar',
+        isSystem: true,
+        permissions: turistaPermissions,
       });
-      await this.roleRepository.save(newManagerRole);
-      console.log('Manager role created with CRUD permissions.');
+      await this.roleRepository.save(newTuristaRole);
+      console.log('Rol Turista creado con permisos básicos.');
     }
   }
 
-  // Create Supervisor Role with mostly READ and UPDATE permissions, but no DELETE or CREATE
-  async createSupervisorRole() {
-    const supervisorRole = await this.roleRepository.findOne({ where: { name: 'Supervisor' } });
-    if (!supervisorRole) {
-      const supervisorPermissions = await this.permissionRepository.find({
-        where: [{ action: Like('%read') }, { action: Like('%update') }],
-      });
-      const newSupervisorRole = this.roleRepository.create({
-        name: 'Supervisor',
-        permissions: supervisorPermissions,
-      });
-      await this.roleRepository.save(newSupervisorRole);
-      console.log('Supervisor role created with READ and UPDATE permissions.');
-    }
-  }
-
-  // Create Viewer Role with only READ permissions
-  async createViewerRole() {
-    const viewerRole = await this.roleRepository.findOne({ where: { name: 'Viewer' } });
-    if (!viewerRole) {
-      const viewerPermissions = await this.permissionRepository.find({
-        where: { action: Like('%read') },
-      });
-      const newViewerRole = this.roleRepository.create({
-        name: 'Viewer',
-        permissions: viewerPermissions,
-      });
-      await this.roleRepository.save(newViewerRole);
-      console.log('Viewer role created with READ-only permissions.');
-    }
-  }
-
-  // Create Basic User Role with limited permissions (for example, basic data access)
-  async createBasicUserRole() {
-    const userRole = await this.roleRepository.findOne({ where: { name: 'User' } });
-    if (!userRole) {
-      const userPermissions = await this.permissionRepository.find({
+  private async createGuiaRole() {
+    const guiaRole = await this.roleRepository.findOne({ where: { name: 'Guia' } });
+    if (!guiaRole) {
+      const guiaPermissions = await this.permissionRepository.find({
         where: [
-          { action: PermissionActions.AUDIT_LOG.READ },
-          { action: PermissionActions.AUTHENTICATION.ME }, // Only has access to own user data
+          { name: PermissionActions.GUIDES.MANAGE },
+          { name: PermissionActions.BOOKINGS.VIEW },
+          { name: PermissionActions.BOOKINGS.MANAGE },
+          { name: PermissionActions.SIGHTINGS.CREATE },
+          { name: PermissionActions.SIGHTINGS.MANAGE },
+          { name: PermissionActions.BIRD_CATALOG.READ },
+          { name: PermissionActions.RESERVES.READ },
+          { name: PermissionActions.EVENTS.READ },
+          { name: PermissionActions.EDUCATIONAL.READ },
+          { name: PermissionActions.AUTHENTICATION.ME },
         ],
       });
-      const newUserRole = this.roleRepository.create({
-        name: 'User',
-        permissions: userPermissions,
+      
+      const newGuiaRole = this.roleRepository.create({
+        name: 'Guia',
+        description: 'Guía verificado',
+        isSystem: true,
+        permissions: guiaPermissions,
       });
-      await this.roleRepository.save(newUserRole);
-      console.log('User role created with limited permissions.');
+      await this.roleRepository.save(newGuiaRole);
+      console.log('Rol Guía creado con permisos extendidos.');
     }
+  }
+
+  private async createAdminUser() {
+    // Buscar el rol Admin
+    const adminRole = await this.roleRepository.findOne({ where: { name: 'Admin' } });
+    if (!adminRole) {
+      console.error('Rol Admin no encontrado, no se puede crear el usuario administrador.');
+      return;
+    }
+
+    // Hashear contraseña de admin y crear usuario admin
+    const hashedPassword = await this.passwordHasher.hashPassword(this.adminPassword);
+    const newUser = this.userRepository.create({
+      nombre: 'Administrador',
+      email: this.adminEmail,
+      emailNormalized: this.adminEmail.toLowerCase(),
+      passwordHash: hashedPassword,
+      isActive: true,
+      isVerified: true,
+      roles: [adminRole],
+    });
+
+    await this.userRepository.save(newUser);
+    console.log('Usuario administrador creado.');
+    console.log(`Email: ${this.adminEmail}`);
+    console.log(`Contraseña: ${this.adminPassword}`);
   }
 }

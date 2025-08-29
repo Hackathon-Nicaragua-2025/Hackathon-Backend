@@ -1,24 +1,42 @@
 // role.entity.ts
-import { Entity, Column, ManyToMany, JoinTable, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, ManyToMany, JoinTable, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 import { Expose } from 'class-transformer';
 import { User } from './user.entity';
 import { Permission } from './permission.entity';
-import { BaseEntity } from '../base-entity.entity';
-import { getSchemaName } from '../../utils/schema-prefix.util';
 
-@Entity('role', { schema: getSchemaName('app') })
-export class Role extends BaseEntity {
-  @PrimaryGeneratedColumn({ name: 'id', type: 'int' })
-  id!: number;
+@Entity('Roles', { schema: 'app' })
+export class Role {
+  @PrimaryGeneratedColumn({ name: 'RoleId', type: 'int' })
+  roleId!: number;
 
-  @Column('nvarchar', { length: 255 })
+  @Column('nvarchar', { length: 50, name: 'Name' })
   @Expose()
   name!: string;
+
+  @Column('nvarchar', { length: 250, nullable: true, name: 'Description' })
+  description!: string;
+
+  @Column('bit', { default: false, name: 'IsSystem' })
+  isSystem!: boolean;
+
+  @CreateDateColumn({ name: 'CreatedAt' })
+  createdAt!: Date;
 
   @ManyToMany(() => User, (user) => user.roles)
   users!: User[];
 
   @ManyToMany(() => Permission, (permission) => permission.roles)
-  @JoinTable()
+  @JoinTable({
+    name: 'RolePermissions',
+    schema: 'app',
+    joinColumn: {
+      name: 'RoleId',
+      referencedColumnName: 'roleId',
+    },
+    inverseJoinColumn: {
+      name: 'PermissionId',
+      referencedColumnName: 'permissionId',
+    },
+  })
   permissions!: Permission[];
 }
