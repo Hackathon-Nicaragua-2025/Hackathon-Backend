@@ -9,15 +9,20 @@ export class Role {
   @PrimaryGeneratedColumn({ name: 'RoleId', type: 'int' })
   roleId!: number;
 
-  @Column('nvarchar', { length: 50, name: 'Name' })
+  @Column('varchar', { length: 50, name: 'Name' })
   @Expose()
   name!: string;
 
-  @Column('nvarchar', { length: 250, nullable: true, name: 'Description' })
+  @Column('varchar', { length: 250, nullable: true, name: 'Description' })
   description!: string;
 
-  @Column('bit', { default: false, name: 'IsSystem' })
+  @Column('boolean', { default: false, name: 'IsSystem' })
   isSystem!: boolean;
+
+  // Propiedad getter para compatibilidad
+  get id(): number {
+    return this.roleId;
+  }
 
   @CreateDateColumn({ name: 'CreatedAt' })
   createdAt!: Date;

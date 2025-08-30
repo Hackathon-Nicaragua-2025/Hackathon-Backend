@@ -9,7 +9,11 @@ export class PaginatedResponseDto<T> extends ApiResponseDto<T[]> {
   meta: PaginatedMetaDto;
 
   private constructor(data: T[], succeeded: boolean, message: string, title: string, meta: PaginatedMetaDto) {
-    super(data, succeeded, message, title);
+    super();
+    this.data = data;
+    this.success = succeeded;
+    this.message = message;
+    this.title = title;
     this.meta = meta;
   }
 

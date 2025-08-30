@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 
 export class RoleDto {
-  @ApiProperty({ example: 1 })
-  @Expose()
+  @ApiProperty({
+    example: 1,
+    description: 'ID del rol',
+  })
   id!: number;
 
   @ApiProperty({
     example: 'Admin',
-    enum: ['Admin', 'Manager', 'Supervisor', 'Viewer', 'User'],
+    description: 'Nombre del rol',
   })
-  @Expose()
   name!: string;
 }

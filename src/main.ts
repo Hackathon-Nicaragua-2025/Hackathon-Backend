@@ -96,8 +96,8 @@ async function bootstrap() {
 
   // Swagger Settings
   const config = new DocumentBuilder()
-    .setTitle('Perf Vision')
-    .setDescription('Perf Vision API documentation')
+    .setTitle('AviFy API')
+    .setDescription('API para la plataforma de aviturismo AviFy')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -108,7 +108,7 @@ async function bootstrap() {
       return `${controllerKey.replace('Controller', '')}_${methodKey}`;
     },
   });
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api', app, document);
 
   app.getHttpAdapter().get('/swagger.yaml', (req, res) => {
     const swaggerYaml = YAML.stringify(document);
@@ -121,7 +121,7 @@ async function bootstrap() {
   await app.listen(port);
 
   // Use Logger instead of console.log
-  Logger.log(`Swagger is running on: http://localhost:${port}/docs`, 'Bootstrap');
+  Logger.log(`Swagger is running on: http://localhost:${port}/api`, 'Bootstrap');
   Logger.log(`Swagger YAML available at: http://localhost:${port}/swagger.yaml`);
 }
 

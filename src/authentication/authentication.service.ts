@@ -37,7 +37,7 @@ export class AuthenticationService {
 
       const user = await this.userRepository.findOne({
         where: { email },
-        select: ['id', 'password', 'isActive', 'firstName', 'lastName', 'email'],
+        select: ['userId', 'passwordHash', 'isActive', 'nombre', 'email'],
         relations: ['roles', 'roles.permissions'], // Fetch roles and their permissions
       });
 
@@ -45,7 +45,7 @@ export class AuthenticationService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const isPasswordValid = await this.passwordHasher.comparePasswords(password, user.password);
+      const isPasswordValid = await this.passwordHasher.comparePasswords(password, user.passwordHash || '');
 
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials');
@@ -59,8 +59,8 @@ export class AuthenticationService {
         excludeExtraneousValues: true,
       });
 
-      const refreshToken = this.getRefreshToken({ id: user.id });
-      const token = this.getJwtToken({ id: user.id });
+      const refreshToken = this.getRefreshToken({ userId: user.userId });
+      const token = this.getJwtToken({ userId: user.userId });
 
       return {
         ...userResponse,
@@ -68,6 +68,11 @@ export class AuthenticationService {
         refreshToken,
         permissions,
         roles, // Include roles in the response
+        // Incluir propiedades getter explícitamente
+        id: userResponse.userId,
+        firstName: userResponse.nombre.split(' ')[0] || userResponse.nombre,
+        lastName: userResponse.nombre.split(' ').slice(1).join(' ') || '',
+        age: 0,
       };
     } catch (error) {
       this.logger.error(`Error during login for email ${loginUserDto.email}:`, error);
@@ -81,16 +86,16 @@ export class AuthenticationService {
 
       // Fetch the user based on the payload from the token
       const user = await this.userRepository.findOne({
-        where: { id: payload.id },
-        relations: ['refreshToken'],
+        where: { userId: payload.userId },
+        relations: ['refreshTokens'],
       });
 
-      if (!user || !user.refreshToken) {
+      if (!user || !user.refreshTokens || user.refreshTokens.length === 0) {
         throw new UnauthorizedException('Invalid user for refresh token');
       }
 
       // Fetch the stored token
-      const storedToken = user.refreshToken;
+      const storedToken = user.refreshTokens[0];
 
       // Check if the token is valid and not expired
       if (!storedToken || new Date(storedToken.expiresAt).getTime() < Date.now()) {
@@ -99,7 +104,7 @@ export class AuthenticationService {
 
       // Return a new JWT token
       return {
-        token: this.getJwtToken({ id: user.id }),
+        token: this.getJwtToken({ userId: user.userId }),
       };
     } catch (error) {
       // Improved error handling for JWT-specific errors
@@ -141,19 +146,19 @@ export class AuthenticationService {
 
       // Fetch roles based on the role names provided in createUserDto
       const assignedRoles = await manager.find(Role, {
-        where: roles.map((roleName) => ({ name: roleName })),
+        where: (roles || []).map((roleName) => ({ name: roleName })),
       });
 
-      if (assignedRoles.length !== roles.length) {
+      if (assignedRoles.length !== (roles || []).length) {
         throw new BadRequestException('One or more roles are invalid');
       }
 
-      // Create the user entity and assign the roles
-      const user = manager.create(User, {
-        ...userData,
-        password: hashedPassword,
-        roles: assignedRoles, // Assign the actual Role entities here
-      });
+             // Create the user entity and assign the roles
+       const user = manager.create(User, {
+         ...userData,
+         passwordHash: hashedPassword,
+         roles: assignedRoles, // Assign the actual Role entities here
+       });
 
       // Save the user
       const savedUser = await manager.save(user);
@@ -170,7 +175,7 @@ export class AuthenticationService {
 
     roles.forEach((role) => {
       role.permissions.forEach((permission) => {
-        permissionsSet.add(permission.action);
+        permissionsSet.add(permission.name);
       });
     });
 
@@ -180,7 +185,7 @@ export class AuthenticationService {
   private getUserRoles(roles: Role[]): RoleDto[] {
     return roles.map((role) => {
       return {
-        id: role.id,
+        id: role.roleId,
         name: role.name,
       };
     });

@@ -6,11 +6,16 @@ export class Permission {
   @PrimaryGeneratedColumn({ name: 'PermissionId', type: 'int' })
   permissionId!: number;
 
-  @Column('nvarchar', { length: 100, name: 'Name' })
+  @Column('varchar', { length: 100, name: 'Name' })
   name!: string;
 
-  @Column('nvarchar', { length: 250, nullable: true, name: 'Description' })
+  @Column('varchar', { length: 250, nullable: true, name: 'Description' })
   description!: string;
+
+  // Propiedad getter para compatibilidad
+  get action(): string {
+    return this.name;
+  }
 
   @ManyToMany(() => Role, (role) => role.permissions)
   roles!: Role[];

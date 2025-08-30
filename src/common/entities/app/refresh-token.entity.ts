@@ -13,22 +13,22 @@ export class RefreshToken {
   @PrimaryGeneratedColumn('uuid', { name: 'RefreshTokenId' })
   refreshTokenId!: string;
 
-  @Column('uniqueidentifier', { name: 'UserId' })
+  @Column('uuid', { name: 'UserId' })
   userId!: string;
 
-  @Column('nvarchar', { length: 500, name: 'TokenHash' })
+  @Column('varchar', { length: 500, name: 'TokenHash' })
   tokenHash!: string;
 
-  @Column('datetime2', { name: 'ExpiresAt' })
+  @Column('timestamptz', { name: 'ExpiresAt' })
   expiresAt!: Date;
 
   @CreateDateColumn({ name: 'CreatedAt' })
   createdAt!: Date;
 
-  @Column('datetime2', { nullable: true, name: 'RevokedAt' })
+  @Column('timestamptz', { nullable: true, name: 'RevokedAt' })
   revokedAt!: Date | null;
 
-  @Column('uniqueidentifier', { nullable: true, name: 'ReplacedByToken' })
+  @Column('uuid', { nullable: true, name: 'ReplacedByToken' })
   replacedByToken!: string | null;
 
   @ManyToOne(() => User, (user) => user.refreshTokens, { onDelete: 'CASCADE' })

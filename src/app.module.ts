@@ -39,16 +39,20 @@ import { AuthorizationModule } from './authorization/authorization.module';
       useFactory: async (configService: ConfigService) => {
         await ConfigModule.envVariablesLoaded;
         return {
-          type: 'mssql',
-          retryAttempts: 1,
-          host: configService.get<string>('DB_HOST'),
-          port: configService.get<number>('DB_PORT'),
-          username: configService.get<string>('DB_USERNAME'),
-          password: configService.get<string>('DB_PASSWORD'),
-          database: configService.get<string>('DB_NAME'),
-          synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
-          logging: configService.get<boolean>('DB_LOGGING'),
+          type: 'postgres',
+          host: configService.get<string>('DATABASE_HOST'),
+          port: configService.get<number>('DATABASE_PORT', 5432),
+          username: configService.get<string>('DATABASE_USERNAME'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          database: configService.get<string>('DATABASE_NAME'),
+          synchronize: false, // IMPORTANTE: false en producción
+          logging: configService.get<string>('NODE_ENV') === 'development',
           entities: [__dirname + '/common/entities/**/*.entity{.ts,.js}'],
+          ssl: {
+            rejectUnauthorized: false, // Para Supabase
+          },
+          autoLoadEntities: true,
+          keepConnectionAlive: true,
         };
       },
     }),
@@ -73,7 +77,7 @@ export class AppModule implements NestModule, OnModuleInit {
   constructor(private readonly seedService: SeedService) {}
 
   async onModuleInit() {
-    await this.seedService.seedIfNeeded();
+    await this.seedService.seed();
   }
 
   configure(consumer: MiddlewareConsumer) {

@@ -9,6 +9,12 @@ export enum ModuleName {
   USERS = 'Users',
   AUDIT_LOG = 'Audit Log',
   AUTHENTICATION = 'Authentication',
+  LOCATIONS = 'Locations',
+  PAYMENTS = 'Payments',
+  STATISTICS = 'Statistics',
+  REVIEWS = 'Reviews',
+  NOTIFICATIONS = 'Notifications',
+  MULTIMEDIA = 'Multimedia',
 }
 
 // Strongly typed structure for PermissionActions
@@ -64,6 +70,38 @@ export const PermissionActions = {
     LOGIN: 'auth_login',
     REFRESH_TOKEN: 'auth_refresh_token',
     ME: 'auth_me',
+  },
+  LOCATIONS: {
+    READ: 'locations_read',
+    CREATE: 'locations_create',
+    UPDATE: 'locations_update',
+    DELETE: 'locations_delete',
+  },
+  PAYMENTS: {
+    READ: 'payments_read',
+    CREATE: 'payments_create',
+    UPDATE: 'payments_update',
+    REFUND: 'payments_refund',
+  },
+  STATISTICS: {
+    READ: 'statistics_read',
+    EXPORT: 'statistics_export',
+  },
+  REVIEWS: {
+    READ: 'reviews_read',
+    CREATE: 'reviews_create',
+    UPDATE: 'reviews_update',
+    DELETE: 'reviews_delete',
+  },
+  NOTIFICATIONS: {
+    READ: 'notifications_read',
+    CREATE: 'notifications_create',
+    SEND: 'notifications_send',
+  },
+  MULTIMEDIA: {
+    READ: 'multimedia_read',
+    UPLOAD: 'multimedia_upload',
+    DELETE: 'multimedia_delete',
   },
 } as const satisfies ModulePermissions;
 

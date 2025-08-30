@@ -13,22 +13,22 @@ export class VerificationToken {
   @PrimaryGeneratedColumn('uuid', { name: 'VerificationId' })
   verificationId!: string;
 
-  @Column('uniqueidentifier', { name: 'UserId' })
+  @Column('uuid', { name: 'UserId' })
   userId!: string;
 
-  @Column('nvarchar', { length: 500, name: 'TokenHash' })
+  @Column('varchar', { length: 500, name: 'TokenHash' })
   tokenHash!: string;
 
-  @Column('nvarchar', { length: 50, name: 'Purpose' })
+  @Column('varchar', { length: 50, name: 'Purpose' })
   purpose!: string; // 'email_verification' | 'password_reset'
 
-  @Column('datetime2', { name: 'ExpiresAt' })
+  @Column('timestamptz', { name: 'ExpiresAt' })
   expiresAt!: Date;
 
   @CreateDateColumn({ name: 'CreatedAt' })
   createdAt!: Date;
 
-  @Column('datetime2', { nullable: true, name: 'UsedAt' })
+  @Column('timestamptz', { nullable: true, name: 'UsedAt' })
   usedAt!: Date | null;
 
   @ManyToOne(() => User, (user) => user.verificationTokens, { onDelete: 'CASCADE' })

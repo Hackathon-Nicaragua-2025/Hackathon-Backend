@@ -3,53 +3,37 @@ import { ApiProperty } from '@nestjs/swagger';
 export class PaginatedMetaDto {
   @ApiProperty({
     example: 1,
-    description: 'The current page number.',
+    description: 'Número de página actual',
   })
-  page: number;
+  page!: number;
 
   @ApiProperty({
     example: 10,
-    description: 'The number of items returned per page.',
+    description: 'Número de elementos por página',
   })
-  take: number;
+  limit!: number;
 
   @ApiProperty({
     example: 100,
-    description: 'The total number of items available in the dataset.',
+    description: 'Total de elementos',
   })
-  itemCount: number;
+  total!: number;
 
   @ApiProperty({
     example: 10,
-    description: 'The total number of pages.',
+    description: 'Total de páginas',
   })
-  pageCount: number;
+  totalPages!: number;
 
   @ApiProperty({
     example: true,
-    description: 'Whether there is a previous page.',
+    description: 'Indica si hay página siguiente',
   })
-  hasPreviousPage: boolean;
+  hasNextPage!: boolean;
 
   @ApiProperty({
-    example: true,
-    description: 'Whether there is a next page.',
+    example: false,
+    description: 'Indica si hay página anterior',
   })
-  hasNextPage: boolean;
-
-  private constructor(
-    page: number,
-    take: number,
-    itemCount: number,
-    pageCount: number,
-    hasPreviousPage: boolean,
-    hasNextPage: boolean,
-  ) {
-    this.page = page;
-    this.take = take;
-    this.itemCount = itemCount;
-    this.pageCount = pageCount;
-    this.hasPreviousPage = hasPreviousPage;
-    this.hasNextPage = hasNextPage;
-  }
+  hasPreviousPage!: boolean;
 }

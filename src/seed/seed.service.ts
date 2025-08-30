@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PermissionActions } from '../app/authentication/enums/authorization.enum';
+import { PermissionActions } from '../authentication/enums/avify-permissions.enum';
 import { Permission } from '../common/entities/app/permission.entity';
 import { Role } from '../common/entities/app/role.entity';
 import { User } from '../common/entities/app/user.entity';
@@ -25,16 +25,18 @@ export class SeedService {
     private readonly passwordHasher: PasswordHasherService,
   ) {}
 
-  async seedIfNeeded() {
+  async seed() {
+    console.log('🌱 Iniciando proceso de seed...');
+
+    await this.createPermissions();
+    await this.createRoles();
+
     const adminUserExists = await this.userRepository.findOne({ where: { email: this.adminEmail } });
     if (!adminUserExists) {
       await this.createAdminUser();
     }
 
-    await this.createPermissions();
-    await this.createRoles();
-
-    console.log('Seeding completado!');
+    console.log('✅ Seeding completado exitosamente!');
   }
 
   private async createPermissions() {
@@ -52,9 +54,9 @@ export class SeedService {
 
         if (!permission) {
           // Crear permiso si no existe
-          permission = this.permissionRepository.create({ 
+          permission = this.permissionRepository.create({
             name: permissionName,
-            description: `Permiso para ${permissionName.replace('_', ' ')}`
+            description: `Permiso para ${permissionName.replace('_', ' ')}`,
           });
           permission = await this.permissionRepository.save(permission);
           existingPermissions.set(permissionName, permission);
@@ -69,10 +71,10 @@ export class SeedService {
   private async createRoles() {
     // Crear rol Turista
     await this.createTuristaRole();
-    
+
     // Crear rol Guía
     await this.createGuiaRole();
-    
+
     // Crear rol Admin (ya se crea en assignPermissionsToAdmin)
   }
 
@@ -111,9 +113,9 @@ export class SeedService {
       const turistaPermissions = await this.permissionRepository.find({
         where: [
           { name: PermissionActions.BOOKINGS.CREATE },
-          { name: PermissionActions.BOOKINGS.VIEW },
+          { name: PermissionActions.BOOKINGS.READ },
           { name: PermissionActions.SIGHTINGS.CREATE },
-          { name: PermissionActions.SIGHTINGS.VIEW },
+          { name: PermissionActions.SIGHTINGS.READ },
           { name: PermissionActions.BIRD_CATALOG.READ },
           { name: PermissionActions.RESERVES.READ },
           { name: PermissionActions.EVENTS.READ },
@@ -121,7 +123,7 @@ export class SeedService {
           { name: PermissionActions.AUTHENTICATION.ME },
         ],
       });
-      
+
       const newTuristaRole = this.roleRepository.create({
         name: 'Turista',
         description: 'Usuario registrado estándar',
@@ -139,7 +141,7 @@ export class SeedService {
       const guiaPermissions = await this.permissionRepository.find({
         where: [
           { name: PermissionActions.GUIDES.MANAGE },
-          { name: PermissionActions.BOOKINGS.VIEW },
+          { name: PermissionActions.BOOKINGS.READ },
           { name: PermissionActions.BOOKINGS.MANAGE },
           { name: PermissionActions.SIGHTINGS.CREATE },
           { name: PermissionActions.SIGHTINGS.MANAGE },
@@ -150,7 +152,7 @@ export class SeedService {
           { name: PermissionActions.AUTHENTICATION.ME },
         ],
       });
-      
+
       const newGuiaRole = this.roleRepository.create({
         name: 'Guia',
         description: 'Guía verificado',

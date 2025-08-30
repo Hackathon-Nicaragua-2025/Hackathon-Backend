@@ -1,67 +1,97 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthenticationService } from './authentication.service';
-import { CreateUserDto, LoginUserDto } from './dto';
-import { UserResponseDto } from './dto/user-response.dto';
-import { ApiResponseDto } from '../common/dto/api-response.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
-import { GetUser } from '../common/decorators/get-user.decorator';
-import { User } from '../common/entities/app/user.entity';
+import { ApiResponseDto } from '../common/dto/api-response.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { TokenResponseDto } from './dto/token-response.dto';
 
-@ApiTags('AviFy - Autenticación')
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
-  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
-  @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente' })
-  @Public()
-  @Post('register')
-  async registerUser(@Body() createUserDto: CreateUserDto): Promise<ApiResponseDto<UserResponseDto>> {
-    const user = await this.authenticationService.create(createUserDto);
-    return ApiResponseDto.Success(user, 'Registro de Usuario', 'Usuario registrado exitosamente.');
-  }
-
-  @ApiOperation({ summary: 'Iniciar sesión' })
-  @ApiResponse({ status: 200, description: 'Inicio de sesión exitoso' })
   @Public()
   @Post('login')
-  async loginUser(@Body() loginUserDto: LoginUserDto) {
-    return await this.authenticationService.login(loginUserDto);
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión de usuario' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login exitoso',
+    type: ApiResponseDto<LoginResponseDto>,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Credenciales inválidas',
+  })
+  async login(@Body() loginUserDto: LoginUserDto) {
+    const result = await this.authenticationService.login(loginUserDto);
+    return ApiResponseDto.Success(result, 'Login Exitoso', 'Usuario autenticado correctamente.');
   }
 
-  @ApiOperation({ summary: 'Renovar token de acceso' })
-  @ApiResponse({ status: 200, description: 'Token renovado exitosamente' })
   @Public()
-  @Post('refresh-token')
-  async refreshToken(@Body() body: { refreshToken: string }) {
-    return await this.authenticationService.refreshToken(body.refreshToken);
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar nuevo usuario' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuario registrado exitosamente',
+    type: ApiResponseDto<UserResponseDto>,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Usuario ya existe o datos inválidos',
+  })
+  async register(@Body() createUserDto: CreateUserDto) {
+    const user = await this.authenticationService.create(createUserDto);
+    return ApiResponseDto.Success(user, 'Usuario Registrado', 'Usuario creado exitosamente.');
   }
 
-  @ApiOperation({ summary: 'Obtener información del usuario actual' })
-  @ApiResponse({ status: 200, description: 'Información del usuario obtenida' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getCurrentUser(@GetUser() user: User): Promise<ApiResponseDto<UserResponseDto>> {
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener información del usuario actual' })
+  @ApiResponse({
+    status: 200,
+    description: 'Información del usuario',
+    type: ApiResponseDto<UserResponseDto>,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado',
+  })
+  async getCurrentUser(@Request() req: any) {
+    const user = req.user;
     return ApiResponseDto.Success(user, 'Usuario Actual', 'Información del usuario obtenida exitosamente.');
   }
 
-  @ApiOperation({ summary: 'Enviar código de recuperación' })
-  @ApiResponse({ status: 200, description: 'Código de recuperación enviado' })
   @Public()
-  @Post('send-recovery-code')
-  async sendRecoveryCode(@Body() body: { email: string }): Promise<ApiResponseDto<void>> {
-    await this.authenticationService.sendPasswordRecoveryCode(body.email);
-    return ApiResponseDto.Success(null, 'Código de Recuperación', 'Código de recuperación enviado exitosamente.');
-  }
-
-  @ApiOperation({ summary: 'Restablecer contraseña' })
-  @ApiResponse({ status: 200, description: 'Contraseña restablecida exitosamente' })
-  @Public()
-  @Post('reset-password')
-  async resetPassword(@Body() body: { email: string; newPassword: string }): Promise<ApiResponseDto<void>> {
-    await this.authenticationService.updatePassword(body.email, body.newPassword);
-    return ApiResponseDto.Success(null, 'Restablecimiento de Contraseña', 'Contraseña restablecida exitosamente.');
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renovar token de acceso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token renovado exitosamente',
+    type: ApiResponseDto<TokenResponseDto>,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Token de renovación inválido o expirado',
+  })
+  async refreshToken(@Body() body: { refreshToken: string }) {
+    const result = await this.authenticationService.refreshToken(body.refreshToken);
+    return ApiResponseDto.Success(result, 'Token Renovado', 'Token de acceso renovado exitosamente.');
   }
 }

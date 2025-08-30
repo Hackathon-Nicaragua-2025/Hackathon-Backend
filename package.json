@@ -19,6 +19,7 @@
       "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
       "dev": "nest start",
       "start": "node build/main",
+      "start:dev": "nest start --watch",
       "dev:watch": "nest start --watch",
       "dev:debug": "nest start --debug --watch",
       "prettier": "prettier --write \"{src,apps,libs,test}/**/*.ts\"",
@@ -28,7 +29,14 @@
       "test:cov": "jest --coverage",
       "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
       "test:e2e": "jest --config ./test/jest-e2e.json",
-      "typeorm": "typeorm-ts-node-commonjs"
+      "typeorm": "typeorm-ts-node-commonjs",
+      "migration:generate": "node scripts/generate-migration.js",
+      "migration:run": "node scripts/run-migrations.js",
+      "migration:simple": "node scripts/simple-migration.js",
+      "migration:revert": "npx typeorm migration:revert -d ormconfig.js",
+      "migration:show": "npx typeorm migration:show -d ormconfig.js",
+      "seed": "nest start --entryFile seed",
+      "db:setup": "npm run migration:run && npm run seed"
    },
    "dependencies": {
       "@nestjs/cache-manager": "^2.3.0",
@@ -50,7 +58,7 @@
       "dotenv": "^16.4.5",
       "express-rate-limit": "^7.4.1",
       "helmet": "^8.0.0",
-      "mssql": "^10.0.4",
+      "pg": "^8.11.3",
       "nest-winston": "^1.9.7",
       "passport": "^0.7.0",
       "passport-jwt": "^4.0.1",

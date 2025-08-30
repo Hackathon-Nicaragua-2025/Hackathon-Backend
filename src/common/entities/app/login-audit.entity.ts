@@ -13,16 +13,16 @@ export class LoginAudit {
   @PrimaryGeneratedColumn('uuid', { name: 'AuditId' })
   auditId!: string;
 
-  @Column('uniqueidentifier', { nullable: true, name: 'UserId' })
+  @Column('uuid', { nullable: true, name: 'UserId' })
   userId!: string | null;
 
-  @Column('nvarchar', { length: 100, name: 'Event' })
+  @Column('varchar', { length: 100, name: 'Event' })
   event!: string; // 'login_success' | 'login_failed' | 'refresh' | 'logout'
 
-  @Column('nvarchar', { length: 100, nullable: true, name: 'IpAddress' })
+  @Column('varchar', { length: 100, nullable: true, name: 'IpAddress' })
   ipAddress!: string | null;
 
-  @Column('nvarchar', { length: 500, nullable: true, name: 'UserAgent' })
+  @Column('varchar', { length: 500, nullable: true, name: 'UserAgent' })
   userAgent!: string | null;
 
   @CreateDateColumn({ name: 'CreatedAt' })

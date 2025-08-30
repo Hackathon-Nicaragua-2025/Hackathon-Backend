@@ -53,7 +53,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     console.log('Error message:', exception);
 
     // Create an error response object.
-    const errorResponse = ApiResponseDto.Failure(message, title);
+    const errorResponse = ApiResponseDto.Error(title, message);
 
     // Send the response in JSON format with the corresponding HTTP status.
     response.status(status).json(errorResponse);

@@ -1,45 +1,44 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ApiResponseDto<T> {
-  @ApiProperty({
-    required: false,
-    type: Object,
-    description: 'The data returned from the operation, if successful.',
-  })
-  data?: T;
-
+export class ApiResponseDto<T = any> {
   @ApiProperty({
     example: true,
-    description: 'Indicates if the operation was successful.',
+    description: 'Indica si la operación fue exitosa',
   })
-  succeeded: boolean;
+  success!: boolean;
 
   @ApiProperty({
-    example: 'Operation successful',
-    description: 'A brief title or status of the operation.',
+    description: 'Datos de la respuesta',
   })
-  title: string;
+  data!: T;
 
   @ApiProperty({
-    example: 'The operation was executed successfully.',
-    description: 'A detailed message explaining the result of the operation.',
+    example: 'Operación Exitosa',
+    description: 'Título del mensaje',
   })
-  message: string;
+  title!: string;
 
-  protected constructor(data: T | null, succeeded: boolean, message: string, title: string) {
-    this.data = data ?? undefined;
-    this.succeeded = succeeded;
-    this.message = message;
-    this.title = title;
+  @ApiProperty({
+    example: 'La operación se completó correctamente',
+    description: 'Descripción detallada del resultado',
+  })
+  message!: string;
+
+  static Success<T>(data: T, title: string, message: string): ApiResponseDto<T> {
+    const response = new ApiResponseDto<T>();
+    response.success = true;
+    response.data = data;
+    response.title = title;
+    response.message = message;
+    return response;
   }
 
-  // Method for success case
-  static Success<T>(data: T, title = '', message = ''): ApiResponseDto<T> {
-    return new ApiResponseDto<T>(data, true, message, title);
-  }
-
-  // Method for failure case
-  static Failure<T>(message: string, title = ''): ApiResponseDto<T> {
-    return new ApiResponseDto<T>(null, false, message, title);
+  static Error(title: string, message: string): ApiResponseDto<null> {
+    const response = new ApiResponseDto<null>();
+    response.success = false;
+    response.data = null;
+    response.title = title;
+    response.message = message;
+    return response;
   }
 }
