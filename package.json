@@ -20,7 +20,7 @@
       "dev": "nest start",
       "start": "node build/main",
       "start:dev": "nest start --watch",
-      "start:prod": "node build/main.js",
+      "start:prod": "node build/src/main.js",
       "dev:watch": "nest start --watch",
       "dev:debug": "nest start --debug --watch",
       "prettier": "prettier --write \"{src,apps,libs,test}/**/*.ts\"",
