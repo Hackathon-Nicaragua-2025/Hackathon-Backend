@@ -1,7 +1,7 @@
 {
    "name": "avify",
    "version": "1.0.0",
-   "description": "AviFy - Plataforma digital para promover el aviturismo y las reservas naturales de Nicaragua",
+       "description": "AviFy - Plataforma digital para promover el aviturismo y las reservas naturales de Nicaragua - v1.0.1",
    "author": "Equipo de Desarrollo AviFy",
    "private": true,
    "license": "MIT",
