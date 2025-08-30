@@ -20,6 +20,7 @@
       "dev": "nest start",
       "start": "node build/main",
       "start:dev": "nest start --watch",
+      "start:prod": "node dist/main",
       "dev:watch": "nest start --watch",
       "dev:debug": "nest start --debug --watch",
       "prettier": "prettier --write \"{src,apps,libs,test}/**/*.ts\"",
@@ -36,7 +37,8 @@
       "migration:revert": "npx typeorm migration:revert -d ormconfig.js",
       "migration:show": "npx typeorm migration:show -d ormconfig.js",
       "seed": "nest start --entryFile seed",
-      "db:setup": "npm run migration:run && npm run seed"
+      "db:setup": "npm run migration:run && npm run seed",
+      "postinstall": "npm run build"
    },
    "dependencies": {
       "@nestjs/cache-manager": "^2.3.0",
