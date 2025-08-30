@@ -3,7 +3,7 @@ services:
     name: avify-api
     env: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx nest build
     startCommand: npm run start:prod
     healthCheckPath: /health
     envVars:

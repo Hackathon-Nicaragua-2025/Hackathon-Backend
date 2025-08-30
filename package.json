@@ -38,7 +38,8 @@
       "migration:show": "npx typeorm migration:show -d ormconfig.js",
       "seed": "nest start --entryFile seed",
       "db:setup": "npm run migration:run && npm run seed",
-      "postinstall": "npm run build"
+      "postinstall": "npm run build",
+      "build:render": "npm install && npx nest build"
    },
    "dependencies": {
       "@nestjs/cache-manager": "^2.3.0",
